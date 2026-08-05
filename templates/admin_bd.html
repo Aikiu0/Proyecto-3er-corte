@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block titulo %}Panel administrador{% endblock %}
+{% block contenido %}
+
+<div class="animar-entrada">
+    <p class="eyebrow">panel</p>
+    <h1>Base de datos</h1>
+
+    <div class="panel-admin">
+        <section class="tarjeta tarjeta-admin">
+            <h3>Usuarios</h3>
+            <div class="tabla-scroll">
+                <table class="tabla-admin">
+                    <thead>
+                        <tr><th>ID</th><th>Nombre</th><th>Edad</th><th>Usuario</th><th>Registrado</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                        <tr>
+                            <td>{{ u.id }}</td><td>{{ u.nombre }}</td><td>{{ u.edad }}</td>
+                            <td>{{ u.usuario }}</td><td>{{ u.fecha_registro }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" class="sin-resultados">Sin usuarios registrados.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="tarjeta tarjeta-admin">
+            <h3>Marcadores</h3>
+            <div class="tabla-scroll">
+                <table class="tabla-admin">
+                    <thead><tr><th>ID</th><th>Usuario</th><th>PPM</th><th>Fecha</th></tr></thead>
+                    <tbody>
+                        {% for m in marcadores %}
+                        <tr><td>{{ m.id }}</td><td>{{ m.usuario }}</td><td>{{ m.velocidad }}</td><td>{{ m.fecha }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="4" class="sin-resultados">Sin marcadores registrados.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="tarjeta tarjeta-admin">
+            <h3>Textos</h3>
+            <div class="tabla-scroll">
+                <table class="tabla-admin">
+                    <thead><tr><th>ID</th><th>Tipo</th><th>Contenido (preview)</th></tr></thead>
+                    <tbody>
+                        {% for t in textos %}
+                        <tr><td>{{ t.id }}</td><td>{{ t.tipo }}</td><td>{{ t.contenido }}…</td></tr>
+                        {% else %}
+                        <tr><td colspan="3" class="sin-resultados">Sin textos registrados.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <p class="enlace-secundario"><a href="{{ url_for('menu') }}">Volver al menú</a></p>
+</div>
+
+{% endblock %}

@@ -1,5 +1,4 @@
-const datosTexto = JSON.parse(document.getElementById("texto-datos").textContent);
-const palabras = datosTexto.split(/\s+/).filter(Boolean);
+const oraciones = JSON.parse(document.getElementById("texto-datos").textContent);
 
 const contenedorTexto = document.getElementById("texto-prueba");
 const entrada = document.getElementById("entrada-usuario");
@@ -10,8 +9,14 @@ const valorWpm = document.getElementById("valor-wpm");
 
 const DURACION_SEGUNDOS = 60;
 
+const palabrasPorOracion = oraciones.map((oracion) => oracion.split(/\s+/).filter(Boolean));
+const totalPalabras = palabrasPorOracion.reduce((total, lista) => total + lista.length, 0);
+
+let indiceOracion = 0;
+let palabras = palabrasPorOracion[indiceOracion];
 let indiceActual = 0;
 let palabrasCorrectas = 0;
+let palabrasCompletadasGlobal = 0;
 let tiempoRestante = DURACION_SEGUNDOS;
 let intervalo = null;
 let pruebaIniciada = false;
@@ -93,6 +98,20 @@ function finalizarPrueba() {
     });
 }
 
+// Avanza a la siguiente oracion, o termina la prueba si ya no hay mas
+function pasarSiguienteOracion() {
+    indiceOracion += 1;
+
+    if (indiceOracion >= palabrasPorOracion.length) {
+        finalizarPrueba();
+        return;
+    }
+
+    palabras = palabrasPorOracion[indiceOracion];
+    indiceActual = 0;
+    dibujarTexto();
+}
+
 // Se ejecuta cuando el usuario confirma una palabra con espacio o enter
 function procesarPalabra() {
     const escrita = entrada.value.trim();
@@ -119,11 +138,12 @@ function procesarPalabra() {
     }
 
     indiceActual += 1;
+    palabrasCompletadasGlobal += 1;
     entrada.value = "";
-    barraProgreso.style.width = `${(indiceActual / palabras.length) * 100}%`;
+    barraProgreso.style.width = `${(palabrasCompletadasGlobal / totalPalabras) * 100}%`;
 
     if (indiceActual >= palabras.length) {
-        finalizarPrueba();
+        pasarSiguienteOracion();
         return;
     }
 
@@ -138,12 +158,13 @@ function retrocederPalabra() {
     }
 
     indiceActual -= 1;
+    palabrasCompletadasGlobal -= 1;
     palabraAnterior.classList.remove("correcta", "incorrecta");
     palabraAnterior.querySelectorAll(".letra").forEach((letra) => {
         letra.classList.remove("correcta", "incorrecta", "cursor");
     });
 
-    barraProgreso.style.width = `${(indiceActual / palabras.length) * 100}%`;
+    barraProgreso.style.width = `${(palabrasCompletadasGlobal / totalPalabras) * 100}%`;
     marcarPalabraActual();
 }
 

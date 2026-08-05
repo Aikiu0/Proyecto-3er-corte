@@ -497,3 +497,55 @@ h1 {
     color: var(--acento);
     margin: 8px 0 24px;
 }
+
+/* Panel admin - Mostrar la BD */
+
+.panel-admin {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.tarjeta-admin {
+    padding: 24px 28px;
+}
+
+.tarjeta-admin h3 {
+    margin: 0 0 16px;
+    font-size: 15px;
+    color: var(--texto-tenue);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.tabla-scroll {
+    overflow-x: auto;
+}
+
+.tabla-admin {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--fuente-mono);
+    font-size: 13px;
+}
+
+.tabla-admin th,
+.tabla-admin td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--borde);
+    white-space: nowrap;
+}
+
+.tabla-admin th {
+    color: var(--texto-tenue);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+}
+
+.tabla-admin tbody tr:hover {
+    background: var(--superficie-2);
+}

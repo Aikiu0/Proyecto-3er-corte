@@ -1,4 +1,5 @@
 import random
+import re
 from datetime import datetime
 from functools import wraps
 
@@ -16,6 +17,16 @@ EXTENSIONES_PERMITIDAS = {"txt", "py"}
 
 def archivo_permitido(nombre_archivo):
     return "." in nombre_archivo and nombre_archivo.rsplit(".", 1)[1].lower() in EXTENSIONES_PERMITIDAS
+
+
+def dividir_en_oraciones(texto, tipo):
+    if tipo == "codigo":
+        lineas = [linea for linea in texto.split("\n") if linea.strip()]
+        return lineas if lineas else [texto]
+
+    oraciones = re.split(r"(?<=[.!?])\s+", texto.strip())
+    oraciones = [o.strip() for o in oraciones if o.strip()]
+    return oraciones if oraciones else [texto]
 
 
 def login_requerido(vista):
@@ -186,7 +197,9 @@ def test(tipo):
         "personalizado": nombre_archivo or "personalizado.txt",
     }
 
-    return render_template("test.html", texto=texto["contenido"], titulo=titulos[tipo])
+    oraciones = dividir_en_oraciones(texto["contenido"], tipo)
+
+    return render_template("test.html", oraciones=oraciones, titulo=titulos[tipo])
 
 
 @app.route("/guardar_resultado", methods=["POST"])
@@ -207,6 +220,33 @@ def guardar_resultado():
         conexion.close()
 
     return jsonify({"ok": True})
+
+
+@app.route("/admin/bd")
+@login_requerido
+def admin_bd():
+    conexion = get_connection()
+    try:
+        with conexion.cursor() as cursor:
+            cursor.execute("SELECT id, nombre, edad, usuario, fecha_registro FROM Usuario ORDER BY id")
+            usuarios = cursor.fetchall()
+
+            cursor.execute(
+                """
+                SELECT m.id, u.usuario, m.velocidad, m.fecha
+                FROM Marcador m
+                JOIN Usuario u ON u.id = m.usuario_id
+                ORDER BY m.fecha DESC
+                """
+            )
+            marcadores = cursor.fetchall()
+
+            cursor.execute("SELECT id, tipo, LEFT(contenido, 60) AS contenido FROM Texto ORDER BY id")
+            textos = cursor.fetchall()
+    finally:
+        conexion.close()
+
+    return render_template("admin_bd.html", usuarios=usuarios, marcadores=marcadores, textos=textos)
 
 
 if __name__ == "__main__":

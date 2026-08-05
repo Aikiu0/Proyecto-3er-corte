@@ -14,6 +14,7 @@
     <a href="{{ url_for('menu') if session.get('usuario_id') else url_for('login') }}" class="logo">&gt; mecanografia_</a>
     {% if session.get('usuario_id') %}
     <nav class="nav-usuario">
+        <a href="{{ url_for('admin_bd') }}" class="enlace-salir">ver BD</a>
         <span class="nombre-sesion">{{ session['usuario'] }}</span>
         <a href="{{ url_for('logout') }}" class="enlace-salir">salir</a>
     </nav>
