@@ -6,6 +6,10 @@ const marcadorTiempo = document.getElementById("tiempo-restante");
 const barraProgreso = document.getElementById("barra-progreso");
 const pantallaResultado = document.getElementById("pantalla-resultado");
 const valorWpm = document.getElementById("valor-wpm");
+const iconoResultado = document.getElementById("icono-resultado");
+const etiquetaNivel = document.getElementById("etiqueta-nivel");
+const rachaBadge = document.getElementById("racha-badge");
+const rachaTexto = document.getElementById("racha-texto");
 
 const DURACION_SEGUNDOS = 60;
 
@@ -21,6 +25,9 @@ let tiempoRestante = DURACION_SEGUNDOS;
 let intervalo = null;
 let pruebaIniciada = false;
 let pruebaTerminada = false;
+
+let rachaActual = 0;
+let temporizadorRacha = null;
 
 function dibujarTexto() {
     contenedorTexto.innerHTML = palabras
@@ -75,6 +82,13 @@ function iniciarCuentaRegresiva() {
     }, 1000);
 }
 
+// Caracol / Liebre / Chita segun los rangos de PPM definidos en la actividad
+function obtenerNivelVelocidad(ppm) {
+    if (ppm <= 30) return { icono: "🐌", etiqueta: "Caracol" };
+    if (ppm <= 60) return { icono: "🐇", etiqueta: "Liebre" };
+    return { icono: "🐆", etiqueta: "Chita" };
+}
+
 function finalizarPrueba() {
     if (pruebaTerminada) {
         return;
@@ -88,6 +102,10 @@ function finalizarPrueba() {
     const minutos = segundosUsados > 0 ? segundosUsados / 60 : 1 / 60;
     const palabrasPorMinuto = Math.round(palabrasCorrectas / minutos);
 
+    const nivel = obtenerNivelVelocidad(palabrasPorMinuto);
+    iconoResultado.textContent = nivel.icono;
+    etiquetaNivel.textContent = nivel.etiqueta;
+
     valorWpm.textContent = palabrasPorMinuto;
     pantallaResultado.classList.add("visible");
 
@@ -96,6 +114,16 @@ function finalizarPrueba() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ velocidad: palabrasPorMinuto }),
     });
+}
+
+// Muestra brevemente el indicador de racha cada 4 palabras seguidas correctas
+function mostrarRacha(cantidad) {
+    rachaTexto.textContent = `¡Racha de ${cantidad}!`;
+    rachaBadge.classList.add("mostrar");
+    clearTimeout(temporizadorRacha);
+    temporizadorRacha = setTimeout(() => {
+        rachaBadge.classList.remove("mostrar");
+    }, 1500);
 }
 
 // Avanza a la siguiente oracion, o termina la prueba si ya no hay mas
@@ -131,9 +159,17 @@ function procesarPalabra() {
         elementoActual.classList.toggle("correcta", esCorrecta);
         elementoActual.classList.toggle("incorrecta", !esCorrecta);
 
-        if (esCorrecta && !elementoActual.dataset.contada) {
-            palabrasCorrectas += 1;
-            elementoActual.dataset.contada = "1";
+        if (esCorrecta) {
+            if (!elementoActual.dataset.contada) {
+                palabrasCorrectas += 1;
+                elementoActual.dataset.contada = "1";
+            }
+            rachaActual += 1;
+            if (rachaActual > 0 && rachaActual % 4 === 0) {
+                mostrarRacha(rachaActual);
+            }
+        } else {
+            rachaActual = 0;
         }
     }
 
@@ -159,6 +195,7 @@ function retrocederPalabra() {
 
     indiceActual -= 1;
     palabrasCompletadasGlobal -= 1;
+    rachaActual = 0;
     palabraAnterior.classList.remove("correcta", "incorrecta");
     palabraAnterior.querySelectorAll(".letra").forEach((letra) => {
         letra.classList.remove("correcta", "incorrecta", "cursor");

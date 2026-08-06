@@ -1,6 +1,7 @@
+import os
 import random
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
@@ -13,6 +14,9 @@ app = Flask(__name__)
 app.secret_key = "cambia-esta-clave-por-una-propia-y-segura"
 
 EXTENSIONES_PERMITIDAS = {"txt", "py"}
+
+MAX_INTENTOS = 4
+BLOQUEO_MINUTOS = 5
 
 
 def archivo_permitido(nombre_archivo):
@@ -57,15 +61,50 @@ def procesar_login():
         with conexion.cursor() as cursor:
             cursor.execute("SELECT * FROM Usuario WHERE usuario = %s", (usuario,))
             fila = cursor.fetchone()
+
+            # Cuenta bloqueada por intentos fallidos previos
+            if fila and fila["bloqueado_hasta"] and fila["bloqueado_hasta"] > datetime.now():
+                segundos_restantes = int((fila["bloqueado_hasta"] - datetime.now()).total_seconds())
+                minutos_restantes = max(1, segundos_restantes // 60 + (1 if segundos_restantes % 60 else 0))
+                flash(f"Cuenta bloqueada por demasiados intentos fallidos. Intenta de nuevo en {minutos_restantes} minuto(s).")
+                return redirect(url_for("login"))
+
+            # Login correcto
+            if fila and check_password_hash(fila["contrasena"], contrasena):
+                cursor.execute(
+                    "UPDATE Usuario SET intentos_fallidos = 0, bloqueado_hasta = NULL WHERE id = %s",
+                    (fila["id"],),
+                )
+                conexion.commit()
+                session["usuario_id"] = fila["id"]
+                session["usuario"] = fila["usuario"]
+                return redirect(url_for("menu"))
+
+            # Login incorrecto: solo contamos intentos si el usuario existe
+            if fila:
+                nuevos_intentos = fila["intentos_fallidos"] + 1
+
+                if nuevos_intentos >= MAX_INTENTOS:
+                    bloqueado_hasta = datetime.now() + timedelta(minutes=BLOQUEO_MINUTOS)
+                    cursor.execute(
+                        "UPDATE Usuario SET intentos_fallidos = 0, bloqueado_hasta = %s WHERE id = %s",
+                        (bloqueado_hasta, fila["id"]),
+                    )
+                    conexion.commit()
+                    flash(f"Demasiados intentos fallidos. Cuenta bloqueada por {BLOQUEO_MINUTOS} minutos.")
+                else:
+                    cursor.execute(
+                        "UPDATE Usuario SET intentos_fallidos = %s WHERE id = %s",
+                        (nuevos_intentos, fila["id"]),
+                    )
+                    conexion.commit()
+                    restantes = MAX_INTENTOS - nuevos_intentos
+                    flash(f"Usuario o contraseña incorrectos. Intentos restantes: {restantes}")
+            else:
+                flash("Usuario o contraseña incorrectos")
     finally:
         conexion.close()
 
-    if fila and check_password_hash(fila["contrasena"], contrasena):
-        session["usuario_id"] = fila["id"]
-        session["usuario"] = fila["usuario"]
-        return redirect(url_for("menu"))
-
-    flash("Usuario o contraseña incorrectos")
     return redirect(url_for("login"))
 
 
@@ -250,4 +289,5 @@ def admin_bd():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    puerto = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=puerto, debug=True)

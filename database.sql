@@ -12,7 +12,9 @@ CREATE TABLE Usuario (
     edad INT NOT NULL,
     usuario VARCHAR(50) NOT NULL UNIQUE,
     contrasena VARCHAR(255) NOT NULL,
-    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    intentos_fallidos INT NOT NULL DEFAULT 0,
+    bloqueado_hasta DATETIME NULL
 );
 
 CREATE TABLE Texto (

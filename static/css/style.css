@@ -549,3 +549,62 @@ h1 {
 .tabla-admin tbody tr:hover {
     background: var(--superficie-2);
 }
+
+/* Reloj mas grande */
+
+.tiempo {
+    font-size: 26px;
+}
+
+/* Icono representativo de velocidad en el resultado */
+
+.icono-resultado {
+    font-size: 56px;
+    margin: 8px 0 0;
+    line-height: 1;
+}
+
+.etiqueta-nivel {
+    color: var(--texto-tenue);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: -12px 0 0;
+}
+
+/* Indicador de racha */
+
+.ventana-terminal {
+    position: relative;
+}
+
+.racha-badge {
+    position: absolute;
+    top: 54px;
+    right: 20px;
+    background: var(--acento-fondo);
+    color: var(--acento);
+    border: 1px solid var(--acento);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-family: var(--fuente-mono);
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateY(-6px) scale(0.9);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.racha-badge.mostrar {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    animation: pulso-racha 0.4s ease;
+}
+
+@keyframes pulso-racha {
+    0% { transform: scale(0.8); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}

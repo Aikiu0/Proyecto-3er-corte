@@ -3,6 +3,8 @@
 {% block contenido %}
 
 <div class="ventana-terminal animar-entrada">
+    <div id="racha-badge" class="racha-badge">🔥 <span id="racha-texto"></span></div>
+
     <div class="barra-terminal">
         <div class="puntos">
             <span class="punto rojo"></span>
@@ -28,8 +30,10 @@
 <div id="pantalla-resultado" class="pantalla-resultado">
     <div class="tarjeta-resultado">
         <p class="eyebrow">resultado</p>
+        <p id="icono-resultado" class="icono-resultado">🐌</p>
         <p class="etiqueta-resultado">Palabras por minuto</p>
         <p id="valor-wpm" class="valor-resultado">0</p>
+        <p id="etiqueta-nivel" class="etiqueta-nivel"></p>
         <a href="{{ url_for('menu') }}" class="boton boton-principal">Volver al menú</a>
     </div>
 </div>
