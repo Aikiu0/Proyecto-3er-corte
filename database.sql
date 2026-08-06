@@ -14,7 +14,7 @@ CREATE TABLE Usuario (
     contrasena VARCHAR(255) NOT NULL,
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     intentos_fallidos INT NOT NULL DEFAULT 0,
-    bloqueado_hasta DATETIME NULL
+    bloqueada TINYINT(1) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE Texto (

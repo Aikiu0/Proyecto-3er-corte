@@ -12,16 +12,28 @@
             <div class="tabla-scroll">
                 <table class="tabla-admin">
                     <thead>
-                        <tr><th>ID</th><th>Nombre</th><th>Edad</th><th>Usuario</th><th>Registrado</th></tr>
+                        <tr><th>ID</th><th>Nombre</th><th>Edad</th><th>Usuario</th><th>Registrado</th>
+                            <th>Intentos</th><th>Estado</th></tr>
                     </thead>
                     <tbody>
                         {% for u in usuarios %}
                         <tr>
                             <td>{{ u.id }}</td><td>{{ u.nombre }}</td><td>{{ u.edad }}</td>
                             <td>{{ u.usuario }}</td><td>{{ u.fecha_registro }}</td>
+                            <td>{{ u.intentos_fallidos }}</td>
+                            <td>
+                                {% if u.bloqueada %}
+                                <form method="POST" action="{{ url_for('desbloquear_usuario', usuario_id=u.id) }}">
+                                    <span class="estado-bloqueada">bloqueada</span>
+                                    <button type="submit" class="boton-mini">desbloquear</button>
+                                </form>
+                                {% else %}
+                                <span class="estado-activa">activa</span>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% else %}
-                        <tr><td colspan="5" class="sin-resultados">Sin usuarios registrados.</td></tr>
+                        <tr><td colspan="7" class="sin-resultados">Sin usuarios registrados.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>

@@ -370,9 +370,92 @@ h1 {
 
 .tiempo {
     font-family: var(--fuente-mono);
-    font-size: 14px;
+    font-size: 18px;
     color: var(--advertencia);
     font-weight: 700;
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    line-height: 1;
+}
+
+.numero-tiempo {
+    font-size: 38px;
+    letter-spacing: -0.02em;
+}
+
+/* Los ultimos 10 segundos se avisan en rojo */
+
+.tiempo.critico {
+    color: var(--error);
+    animation: parpadeo-tiempo 1s ease-in-out infinite;
+}
+
+@keyframes parpadeo-tiempo {
+    50% {
+        opacity: 0.45;
+    }
+}
+
+/* Racha de palabras correctas seguidas */
+
+.racha {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--fuente-mono);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--advertencia);
+    background: rgba(251, 191, 36, 0.12);
+    border: 1px solid var(--advertencia);
+    border-radius: 999px;
+    padding: 4px 12px;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.racha.visible {
+    opacity: 1;
+    transform: scale(1);
+    animation: latido-racha 0.9s ease-in-out infinite;
+}
+
+.icono-racha {
+    font-size: 18px;
+    line-height: 1;
+}
+
+@keyframes latido-racha {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.09);
+    }
+}
+
+/* Al subir de racha se hace un destello */
+
+.racha.pulso {
+    animation: destello-racha 0.35s ease;
+}
+
+@keyframes destello-racha {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.5);
+    }
+    50% {
+        transform: scale(1.25);
+        box-shadow: 0 0 0 10px rgba(251, 191, 36, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+    }
 }
 
 .cuerpo-terminal {
@@ -495,7 +578,65 @@ h1 {
     font-size: 64px;
     font-weight: 700;
     color: var(--acento);
-    margin: 8px 0 24px;
+    margin: 8px 0 8px;
+}
+
+/* Imagen alusiva a la velocidad: caracol, liebre o chita */
+
+.imagen-resultado {
+    width: 180px;
+    height: 180px;
+    display: block;
+    margin: 8px auto 0;
+    animation: entrada-imagen 0.5s ease both;
+}
+
+@keyframes entrada-imagen {
+    from {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.nivel-resultado {
+    font-family: var(--fuente-mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--texto);
+    margin: 4px 0 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.frase-resultado {
+    color: var(--texto-tenue);
+    font-size: 14px;
+    margin: 0 0 8px;
+    max-width: 280px;
+}
+
+.acciones-resultado {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.boton-secundario {
+    background: transparent;
+    border: 1px solid var(--borde);
+    color: var(--texto-tenue);
+    padding: 12px 20px;
+    margin-top: 22px;
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.boton-secundario:hover {
+    border-color: var(--acento);
+    color: var(--acento);
 }
 
 /* Panel admin - Mostrar la BD */
@@ -549,62 +690,36 @@ h1 {
 .tabla-admin tbody tr:hover {
     background: var(--superficie-2);
 }
+/* Estado de las cuentas en el panel de la BD */
 
-/* Reloj mas grande */
-
-.tiempo {
-    font-size: 26px;
-}
-
-/* Icono representativo de velocidad en el resultado */
-
-.icono-resultado {
-    font-size: 56px;
-    margin: 8px 0 0;
-    line-height: 1;
-}
-
-.etiqueta-nivel {
-    color: var(--texto-tenue);
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin: -12px 0 0;
-}
-
-/* Indicador de racha */
-
-.ventana-terminal {
-    position: relative;
-}
-
-.racha-badge {
-    position: absolute;
-    top: 54px;
-    right: 20px;
-    background: var(--acento-fondo);
+.estado-activa {
     color: var(--acento);
-    border: 1px solid var(--acento);
-    padding: 6px 14px;
+}
+
+.estado-bloqueada {
+    color: var(--error);
+    margin-right: 8px;
+}
+
+.tabla-admin form {
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.boton-mini {
+    background: transparent;
+    border: 1px solid var(--borde);
     border-radius: 999px;
+    color: var(--texto-tenue);
     font-family: var(--fuente-mono);
-    font-size: 13px;
-    font-weight: 700;
-    opacity: 0;
-    transform: translateY(-6px) scale(0.9);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-    pointer-events: none;
-    z-index: 2;
+    font-size: 11px;
+    padding: 3px 10px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
 }
 
-.racha-badge.mostrar {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    animation: pulso-racha 0.4s ease;
-}
-
-@keyframes pulso-racha {
-    0% { transform: scale(0.8); }
-    50% { transform: scale(1.15); }
-    100% { transform: scale(1); }
+.boton-mini:hover {
+    border-color: var(--acento);
+    color: var(--acento);
 }

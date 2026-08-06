@@ -3,8 +3,6 @@
 {% block contenido %}
 
 <div class="ventana-terminal animar-entrada">
-    <div id="racha-badge" class="racha-badge">🔥 <span id="racha-texto"></span></div>
-
     <div class="barra-terminal">
         <div class="puntos">
             <span class="punto rojo"></span>
@@ -12,7 +10,11 @@
             <span class="punto verde"></span>
         </div>
         <span class="nombre-archivo">{{ titulo }}</span>
-        <span class="tiempo"><span id="tiempo-restante">60</span>s</span>
+        <div id="racha" class="racha">
+            <span class="icono-racha">🔥</span>
+            <span id="racha-numero">0</span>
+        </div>
+        <span id="tiempo" class="tiempo"><span id="tiempo-restante" class="numero-tiempo">60</span>s</span>
     </div>
 
     <div class="cuerpo-terminal">
@@ -30,15 +32,22 @@
 <div id="pantalla-resultado" class="pantalla-resultado">
     <div class="tarjeta-resultado">
         <p class="eyebrow">resultado</p>
-        <p id="icono-resultado" class="icono-resultado">🐌</p>
         <p class="etiqueta-resultado">Palabras por minuto</p>
         <p id="valor-wpm" class="valor-resultado">0</p>
-        <p id="etiqueta-nivel" class="etiqueta-nivel"></p>
-        <a href="{{ url_for('menu') }}" class="boton boton-principal">Volver al menú</a>
+
+        <img id="imagen-resultado" class="imagen-resultado" src="" alt="">
+        <p id="nivel-resultado" class="nivel-resultado"></p>
+        <p id="frase-resultado" class="frase-resultado"></p>
+
+        <div class="acciones-resultado">
+            <a href="{{ url_for('menu') }}" class="boton boton-secundario">Volver al menú</a>
+            <a href="{{ request.full_path }}" class="boton boton-principal">Repetir prueba</a>
+        </div>
     </div>
 </div>
 
 <script id="texto-datos" type="application/json">{{ oraciones | tojson }}</script>
+<script id="niveles-datos" type="application/json">{{ niveles | tojson }}</script>
 <script src="{{ url_for('static', filename='js/test.js') }}"></script>
 
 {% endblock %}

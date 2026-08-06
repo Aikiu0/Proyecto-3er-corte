@@ -1,17 +1,13 @@
-import os
-
 import pymysql
 from pymysql.cursors import DictCursor
 
-# En local usa los valores por defecto (root/root).
-# En Railway, estas variables de entorno las provee automaticamente
-# el plugin de MySQL, asi que no hay que tocar nada aqui.
+# Ajusta estos datos segun tu instalacion de MySQL
 DB_CONFIG = {
-    "host": os.environ.get("MYSQLHOST", "localhost"),
-    "user": os.environ.get("MYSQLUSER", "root"),
-    "password": os.environ.get("MYSQLPASSWORD", "root"),
-    "database": os.environ.get("MYSQLDATABASE", "mecanografia_db"),
-    "port": int(os.environ.get("MYSQLPORT", 3306)),
+    "host": "localhost",
+    "user": "root",
+    "password": "root",
+    "database": "mecanografia_db",
+    "port": 3306,
     "cursorclass": DictCursor,
 }
 

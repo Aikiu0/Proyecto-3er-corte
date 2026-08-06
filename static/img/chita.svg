@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Chita">
+    <circle cx="100" cy="100" r="96" fill="#fbbf24" fill-opacity="0.12"/>
+
+    <!-- Lineas de velocidad -->
+    <g stroke="#fbbf24" stroke-opacity="0.45" stroke-width="5" stroke-linecap="round">
+        <path d="M 10 78 h 34"/>
+        <path d="M 4 100 h 44"/>
+        <path d="M 12 122 h 30"/>
+        <path d="M 20 144 h 20"/>
+    </g>
+
+    <!-- Cola larga -->
+    <path d="M 62 108 C 36 104 28 78 44 62" fill="none" stroke="#fbbf24" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="44" cy="60" r="6" fill="#12141c" fill-opacity="0.55"/>
+
+    <!-- Patas en carrera -->
+    <g stroke="#fbbf24" stroke-width="11" stroke-linecap="round" fill="none">
+        <path d="M 82 120 L 66 152"/>
+        <path d="M 96 122 L 104 154"/>
+        <path d="M 126 120 L 118 152"/>
+        <path d="M 138 116 L 156 142"/>
+    </g>
+
+    <!-- Cuerpo -->
+    <path d="M 62 106 C 74 84 128 82 146 100 C 156 110 150 126 134 126 L 78 126 C 64 126 58 116 62 106 Z" fill="#fbbf24"/>
+
+    <!-- Manchas -->
+    <g fill="#12141c" fill-opacity="0.55">
+        <circle cx="86" cy="102" r="4.5"/>
+        <circle cx="104" cy="96" r="4"/>
+        <circle cx="120" cy="104" r="4.5"/>
+        <circle cx="96" cy="114" r="4"/>
+        <circle cx="132" cy="114" r="4"/>
+        <circle cx="112" cy="118" r="3.5"/>
+    </g>
+
+    <!-- Cabeza -->
+    <circle cx="156" cy="86" r="21" fill="#fbbf24"/>
+    <path d="M 140 70 l -2 -16 l 15 8 z" fill="#fbbf24"/>
+    <path d="M 170 68 l 6 -15 l 4 15 z" fill="#fbbf24"/>
+
+    <!-- Cara: ojo y lagrimal caracteristico -->
+    <circle cx="164" cy="82" r="4.5" fill="#12141c"/>
+    <path d="M 164 88 L 160 100" stroke="#12141c" stroke-opacity="0.6" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="172" cy="94" r="4" fill="#12141c" fill-opacity="0.6"/>
+</svg>

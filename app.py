@@ -1,7 +1,6 @@
-import os
 import random
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import wraps
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
@@ -15,8 +14,30 @@ app.secret_key = "cambia-esta-clave-por-una-propia-y-segura"
 
 EXTENSIONES_PERMITIDAS = {"txt", "py"}
 
-MAX_INTENTOS = 4
-BLOQUEO_MINUTOS = 5
+# Intentos de inicio de sesion antes de bloquear la cuenta
+INTENTOS_MAXIMOS = 4
+
+# Imagen que se muestra al terminar la prueba segun las palabras por minuto
+NIVELES_VELOCIDAD = [
+    {
+        "maximo": 30,
+        "nombre": "Caracol",
+        "archivo": "img/caracol.svg",
+        "frase": "Menos de 30 ppm. Vas con calma, sigue practicando.",
+    },
+    {
+        "maximo": 60,
+        "nombre": "Liebre",
+        "archivo": "img/liebre.svg",
+        "frase": "Entre 31 y 60 ppm. Buen ritmo, ya se nota la práctica.",
+    },
+    {
+        "maximo": 9999,
+        "nombre": "Chita",
+        "archivo": "img/chita.svg",
+        "frase": "Más de 60 ppm. Escribes a toda velocidad.",
+    },
+]
 
 
 def archivo_permitido(nombre_archivo):
@@ -62,48 +83,39 @@ def procesar_login():
             cursor.execute("SELECT * FROM Usuario WHERE usuario = %s", (usuario,))
             fila = cursor.fetchone()
 
-            # Cuenta bloqueada por intentos fallidos previos
-            if fila and fila["bloqueado_hasta"] and fila["bloqueado_hasta"] > datetime.now():
-                segundos_restantes = int((fila["bloqueado_hasta"] - datetime.now()).total_seconds())
-                minutos_restantes = max(1, segundos_restantes // 60 + (1 if segundos_restantes % 60 else 0))
-                flash(f"Cuenta bloqueada por demasiados intentos fallidos. Intenta de nuevo en {minutos_restantes} minuto(s).")
+            # Usuario inexistente: no se avisa cual de los dos datos fallo
+            if not fila:
+                flash("Usuario o contraseña incorrectos")
                 return redirect(url_for("login"))
 
-            # Login correcto
-            if fila and check_password_hash(fila["contrasena"], contrasena):
-                cursor.execute(
-                    "UPDATE Usuario SET intentos_fallidos = 0, bloqueado_hasta = NULL WHERE id = %s",
-                    (fila["id"],),
-                )
+            if fila["bloqueada"]:
+                flash("Esta cuenta está bloqueada por superar los 4 intentos fallidos.")
+                return redirect(url_for("login"))
+
+            # Acceso correcto: se reinicia el contador de intentos
+            if check_password_hash(fila["contrasena"], contrasena):
+                cursor.execute("UPDATE Usuario SET intentos_fallidos = 0 WHERE id = %s", (fila["id"],))
                 conexion.commit()
                 session["usuario_id"] = fila["id"]
                 session["usuario"] = fila["usuario"]
                 return redirect(url_for("menu"))
 
-            # Login incorrecto: solo contamos intentos si el usuario existe
-            if fila:
-                nuevos_intentos = fila["intentos_fallidos"] + 1
-
-                if nuevos_intentos >= MAX_INTENTOS:
-                    bloqueado_hasta = datetime.now() + timedelta(minutes=BLOQUEO_MINUTOS)
-                    cursor.execute(
-                        "UPDATE Usuario SET intentos_fallidos = 0, bloqueado_hasta = %s WHERE id = %s",
-                        (bloqueado_hasta, fila["id"]),
-                    )
-                    conexion.commit()
-                    flash(f"Demasiados intentos fallidos. Cuenta bloqueada por {BLOQUEO_MINUTOS} minutos.")
-                else:
-                    cursor.execute(
-                        "UPDATE Usuario SET intentos_fallidos = %s WHERE id = %s",
-                        (nuevos_intentos, fila["id"]),
-                    )
-                    conexion.commit()
-                    restantes = MAX_INTENTOS - nuevos_intentos
-                    flash(f"Usuario o contraseña incorrectos. Intentos restantes: {restantes}")
-            else:
-                flash("Usuario o contraseña incorrectos")
+            # Contraseña incorrecta: se suma el intento y se bloquea al llegar al limite
+            intentos = fila["intentos_fallidos"] + 1
+            bloquear = intentos >= INTENTOS_MAXIMOS
+            cursor.execute(
+                "UPDATE Usuario SET intentos_fallidos = %s, bloqueada = %s WHERE id = %s",
+                (intentos, 1 if bloquear else 0, fila["id"]),
+            )
+        conexion.commit()
     finally:
         conexion.close()
+
+    if bloquear:
+        flash("Cuenta bloqueada: llegaste a 4 intentos fallidos de inicio de sesión.")
+    else:
+        restantes = INTENTOS_MAXIMOS - intentos
+        flash(f"Usuario o contraseña incorrectos. Te quedan {restantes} intento(s) antes del bloqueo.")
 
     return redirect(url_for("login"))
 
@@ -238,7 +250,17 @@ def test(tipo):
 
     oraciones = dividir_en_oraciones(texto["contenido"], tipo)
 
-    return render_template("test.html", oraciones=oraciones, titulo=titulos[tipo])
+    niveles = [
+        {
+            "maximo": nivel["maximo"],
+            "nombre": nivel["nombre"],
+            "frase": nivel["frase"],
+            "imagen": url_for("static", filename=nivel["archivo"]),
+        }
+        for nivel in NIVELES_VELOCIDAD
+    ]
+
+    return render_template("test.html", oraciones=oraciones, titulo=titulos[tipo], niveles=niveles)
 
 
 @app.route("/guardar_resultado", methods=["POST"])
@@ -267,7 +289,12 @@ def admin_bd():
     conexion = get_connection()
     try:
         with conexion.cursor() as cursor:
-            cursor.execute("SELECT id, nombre, edad, usuario, fecha_registro FROM Usuario ORDER BY id")
+            cursor.execute(
+                """
+                SELECT id, nombre, edad, usuario, fecha_registro, intentos_fallidos, bloqueada
+                FROM Usuario ORDER BY id
+                """
+            )
             usuarios = cursor.fetchall()
 
             cursor.execute(
@@ -288,6 +315,23 @@ def admin_bd():
     return render_template("admin_bd.html", usuarios=usuarios, marcadores=marcadores, textos=textos)
 
 
+@app.route("/admin/desbloquear/<int:usuario_id>", methods=["POST"])
+@login_requerido
+def desbloquear_usuario(usuario_id):
+    conexion = get_connection()
+    try:
+        with conexion.cursor() as cursor:
+            cursor.execute(
+                "UPDATE Usuario SET intentos_fallidos = 0, bloqueada = 0 WHERE id = %s",
+                (usuario_id,),
+            )
+        conexion.commit()
+    finally:
+        conexion.close()
+
+    flash("Cuenta desbloqueada")
+    return redirect(url_for("admin_bd"))
+
+
 if __name__ == "__main__":
-    puerto = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=puerto, debug=True)
+    app.run(debug=True)

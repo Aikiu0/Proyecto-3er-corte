@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Caracol">
+    <circle cx="100" cy="100" r="96" fill="#8b8f9c" fill-opacity="0.12"/>
+
+    <!-- Rastro de baba -->
+    <path d="M 26 158 Q 60 150 96 158 Q 132 166 170 158" fill="none" stroke="#8b8f9c" stroke-opacity="0.45"
+          stroke-width="4" stroke-linecap="round" stroke-dasharray="2 12"/>
+
+    <!-- Cuerpo -->
+    <path d="M 30 150 a 20 20 0 0 1 22 -28 h 90 a 26 26 0 0 1 26 28 z" fill="#8b8f9c"/>
+
+    <!-- Antenas -->
+    <path d="M 148 126 C 157 115 163 105 163 95" fill="none" stroke="#8b8f9c" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 136 126 C 141 114 144 103 145 94" fill="none" stroke="#8b8f9c" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="164" cy="90" r="6" fill="#e8e9ee"/>
+    <circle cx="145" cy="89" r="6" fill="#e8e9ee"/>
+    <circle cx="165" cy="89" r="2.4" fill="#12141c"/>
+    <circle cx="146" cy="88" r="2.4" fill="#12141c"/>
+
+    <!-- Concha en espiral -->
+    <circle cx="98" cy="96" r="33" fill="#64748b"/>
+    <path d="M 130 96 A 32 32 0 0 1 66 96 A 26 26 0 0 1 118 96 A 20 20 0 0 1 78 96 A 14 14 0 0 1 106 96 A 8 8 0 0 1 90 96"
+          fill="none" stroke="#12141c" stroke-opacity="0.45" stroke-width="6" stroke-linecap="round"/>
+</svg>
